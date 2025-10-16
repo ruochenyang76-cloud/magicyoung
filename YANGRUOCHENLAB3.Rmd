@@ -1,0 +1,145 @@
+---
+title: "LAB3"
+output:
+  html_document:
+    df_print: paged
+date: "2025-09-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r cars, include=FALSE}
+summary(cars)
+```
+
+```{r pressure, include=FALSE}
+plot(pressure)
+```
+
+Q1 Poisson process in 2 Dimensions
+
+```         
+N <- rpois(1, 4 * 100)  # Adjusted rate λ = 4 over area 100 (10x10)
+U1 <- runif(N, min=0, max=10)
+U2 <- runif(N, min=0, max=10)
+plot(U1, U2)
+```
+
+![](images/clipboard-3950563298.png)
+
+Poisson process in 2 Dimensions
+
+```         
+N <- rpois(1, 1 * 100)  # Adjusted rate λ = 1 over area 100 (10x10)
+U1 <- runif(N, min=0, max=10)
+U2 <- runif(N, min=0, max=10)
+plot(U1, U2)
+```
+
+![](images/clipboard-1541304627.png)
+
+Q2
+
+```         
+set.seed(123)
+
+N <- rpois(1, 20)
+U1 <- runif(N, 0, 1000)
+U2 <- runif(N, 0, 1000)
+clusters <- data.frame(x = U1, y = U2)
+
+simulate_and_plot_normal <- function(sd_intra, title = NULL) {
+  M <- rpois(N, 40)
+  gx <- gy <- NULL
+  
+  for (i in 1:N) {
+    gx <- c(gx, rnorm(M[i], mean = U1[i], sd = sd_intra))
+    gy <- c(gy, rnorm(M[i], mean = U2[i], sd = sd_intra))
+  }
+  
+  plot(gx, gy, pch = 16, cex = 0.5,
+       xlim = c(0, 1000), ylim = c(0, 1000),
+       xlab = "x", ylab = "y", main = title)
+  points(clusters$x, clusters$y, pch = 3, cex = 1.2)
+  invisible(data.frame(x = gx, y = gy))
+}
+
+simulate_and_plot_exponential <- function(rate, title = NULL) {
+  M <- rpois(N, 40)
+  gx <- gy <- NULL
+  
+  for (i in 1:N) {
+    r <- rexp(M[i], rate = rate)
+    th <- runif(M[i], 0, 2*pi)
+    gx <- c(gx, U1[i] + r * cos(th))
+    gy <- c(gy, U2[i] + r * sin(th))
+  }
+  
+  plot(gx, gy, pch = 16, cex = 0.5,
+       xlim = c(0, 1000), ylim = c(0, 1000),
+       xlab = "x", ylab = "y", main = title)
+  points(clusters$x, clusters$y, pch = 3, cex = 1.2)
+  invisible(data.frame(x = gx, y = gy))
+}
+
+par(mfrow = c(1, 2))
+gal_sd40 <- simulate_and_plot_normal(40, title = "Normal clusters (sd = 40)")
+gal_sd10 <- simulate_and_plot_normal(10, title = "Normal clusters (sd = 10)")
+
+par(mfrow = c(1, 1))
+gal_exp <- simulate_and_plot_exponential(rate = 1/20, title = "Exponential clusters")
+```
+
+![](images/clipboard-3091285106.png)
+
+**SD=40**
+
+![](images/clipboard-3091285106.png)
+
+**SD=10**
+
+When sd = 40: The clusters are very dispersed, often overlapping, and harder to distinguish. When sd = 10: The clusters are tight, compact, and much easier to separate.
+
+**Q3**
+
+```         
+set.seed(123)
+
+lambda \<- 15 n \<- 1000000
+
+U \<- runif(n) X \<- -log(1 - U) / lambda
+
+hist(X, breaks = 100, prob = TRUE, col = "lightblue", border = "white", xlab = "x", main = "Exponential(lambda = 15) via Inverse Transform")
+
+curve(dexp(x, rate = lambda), col = "red", lwd = 2, add = TRUE)
+
+legend("topright", legend = c("Simulated histogram", "True density"), col = c("lightblue", "red"), lwd = c(10, 2), bty = "n")
+```
+
+![](images/clipboard-3788602830.png)
+
+![**Q4**](images/clipboard-2900445816.png)
+
+```         
+set.seed(123)
+
+k <- 10
+lambda <- 1
+n <- 1000000
+
+samples <- replicate(n, sum(rexp(k, rate = lambda)))
+
+hist(samples, breaks = 100, prob = TRUE,
+     col = "lightblue", border = "white",
+     xlab = "x", main = paste("Gamma(", k, ",", lambda, ") Simulation"))
+
+curve(dgamma(x, shape = k, rate = lambda),
+      col = "red", lwd = 2, add = TRUE)
+
+legend("topright", legend = c("Simulated histogram", "True density"),
+       col = c("lightblue", "red"), lwd = c(10, 2), bty = "n")
+```
+
+![](images/clipboard-2400332946.png)
